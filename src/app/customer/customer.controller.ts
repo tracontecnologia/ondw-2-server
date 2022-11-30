@@ -9,6 +9,7 @@ import {
   ParseUUIDPipe,
   Patch,
   Post,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
@@ -28,8 +29,8 @@ export class CustomerController {
 
   @Post()
   @UseGuards(AuthGuard('jwt'))
-  async createNew(@Body() body: CreateCustomerDto) {
-    const userId = '91a39aa3-543c-4727-ab96-58559f37a987';
+  async createNew(@Req() req, @Body() body: CreateCustomerDto) {
+    const userId = req.user.id;
     return this.customerService.createNew(body, userId);
   }
 
