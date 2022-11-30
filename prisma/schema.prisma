@@ -32,6 +32,7 @@ model Customer {
   externalId String    @db.VarChar(255)
   user       User      @relation(fields: [userId], references: [id])
   userId     String    @db.VarChar(36)
+  platform   String    @db.VarChar(255)
   createdAt  DateTime  @default(now())
   updatedAt  DateTime?
   deletedAt  DateTime?
@@ -51,6 +52,7 @@ model Billing {
   externalId   String    @db.VarChar(255)
   boletoNumber String?   @db.VarChar(255)
   pixCode      String?   @db.VarChar(255)
+  platform     String    @db.VarChar(255)
   createdAt    DateTime  @default(now())
   updatedAt    DateTime?
   deletedAt    DateTime?

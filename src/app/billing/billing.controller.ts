@@ -61,4 +61,10 @@ export class BillingController {
   async deleteById(@Param('id', new ParseUUIDPipe()) id: string) {
     await this.billingService.deleteById(id);
   }
+
+  @Post('webhooks')
+  @HttpCode(HttpStatus.OK)
+  async webhooks(@Body() body) {
+    this.billingService.webhooks(body);
+  }
 }

@@ -30,6 +30,7 @@ export class CustomerService {
         email: true,
         cellphone: true,
         externalId: true,
+        platform: true,
       },
       where: {
         deletedAt: null,
@@ -39,11 +40,13 @@ export class CustomerService {
 
   async createNew(data: CreateCustomerDto, userId: string) {
     try {
+      const platform = this.payment.getPlatform();
       const externalId = await this.findOneOrCreateAnExternalCustomer(data);
       return await this.prismaService.customer.create({
         data: {
           ...data,
           externalId,
+          platform,
           user: { connect: { id: userId } },
         },
       });
@@ -62,6 +65,7 @@ export class CustomerService {
           email: true,
           cellphone: true,
           externalId: true,
+          platform: true,
         },
         where: { id, deletedAt: null },
       });

@@ -74,6 +74,7 @@ export class BillingService {
         externalId: true,
         boletoNumber: true,
         pixCode: true,
+        platform: true,
       },
       where: {
         deletedAt: null,
@@ -83,6 +84,7 @@ export class BillingService {
 
   async createNew(data: CreateBillingDto, userId: string) {
     try {
+      const platform = this.payment.getPlatform();
       const {
         id: externalId,
         boletoNumber,
@@ -92,6 +94,7 @@ export class BillingService {
       return await this.prismaService.billing.create({
         data: {
           ...rest,
+          platform,
           externalId,
           boletoNumber,
           pixCode,
@@ -120,6 +123,7 @@ export class BillingService {
           externalId: true,
           boletoNumber: true,
           pixCode: true,
+          platform: true,
         },
         where: { id, deletedAt: null },
       });
@@ -158,5 +162,22 @@ export class BillingService {
       customerId: customerExternalId,
     });
     return await this.payment.createPayment(newPayment);
+  }
+
+  async webhooks(data) {
+    const webhook = this.payment.parseWebHooks(data);
+    if (!webhook) return;
+
+    try {
+      const { id: externalId, status } = webhook;
+      const billing = await this.prismaService.billing.findFirstOrThrow({
+        select: { id: true },
+        where: { externalId },
+      });
+      await this.prismaService.billing.update({
+        data: { status },
+        where: { id: billing.id },
+      });
+    } catch (error) {}
   }
 }

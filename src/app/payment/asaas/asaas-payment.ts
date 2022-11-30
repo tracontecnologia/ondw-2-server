@@ -11,6 +11,11 @@ import { AsaasPixInterface } from './asaas-pix.interface';
 import { PaymentTypeEnum } from '../payment-type.enum';
 import { AsaasPaginateInterface } from './asaas-paginate.interface';
 import { AsaasRequestNewPaymentInterface } from './asaas-request-new-payment.interface';
+import { PaymentPlatformEnum } from '../payment-platform.enum';
+import { PaymentWebHook } from '../payment-webhook.interface';
+import { AsaasWebHookInterface } from './asaas-webhook.interface';
+import { AsaasWebHookEventEnum } from './asaas-webhook-event.enum';
+import { BillingStatusEnum } from '../../billing/enum/billing-status.enum';
 
 @Injectable()
 export class AsaasPayment implements PaymentInterface {
@@ -18,6 +23,30 @@ export class AsaasPayment implements PaymentInterface {
   private readonly token = process.env.ASAAS_TOKEN as string;
 
   constructor(private readonly httpService: HttpService) {}
+
+  getPlatform(): PaymentPlatformEnum {
+    return PaymentPlatformEnum.ASAAS;
+  }
+
+  parseWebHooks(data: AsaasWebHookInterface): PaymentWebHook {
+    const status = {
+      RECEIVED: BillingStatusEnum.PAID,
+      OVERDUE: BillingStatusEnum.LATE,
+    };
+
+    if (
+      [
+        AsaasWebHookEventEnum.PAYMENT_RECEIVED,
+        AsaasWebHookEventEnum.PAYMENT_OVERDUE,
+      ].includes(data.event)
+    ) {
+      return {
+        id: data.payment.id,
+        value: data.payment.value,
+        status: status[data.payment.status],
+      };
+    }
+  }
 
   async createCustomer(newCustomer: PaymentCustomer): Promise<PaymentCustomer> {
     const url = `${this.baseURL}/v3/customers`;
